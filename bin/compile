@@ -5,16 +5,19 @@
 set -e
 
 # config
-APACHE_VERSION="2.2.22"
+APACHE_VERSION="2.2.24"
 APACHE_PATH="apache"
-PHP_VERSION="5.3.10"
+PHP_VERSION="5.3.24"
 PHP_PATH="php"
 DOWNLOAD_SERVER="http://10.168.3.189/static"
+APACHE_FILE_NAME="apache-$APACHE_VERSION.tar.gz"
+PHP_FILE_NAME="php-$PHP_VERSION.tar.gz"
 
 BIN_DIR=$(dirname $0)
 BUILD_DIR=$1
 CACHE_DIR=$2
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
+if [ -z "$BUILDPACK_CACHE" ]; then BUILDPACK_CACHE="/tmp"; fi
 
 # include .files when moving things around
 shopt -s dotglob
@@ -31,13 +34,23 @@ if [ -f www/Procfile ]; then
   mv www/Procfile .
 fi
 
-APACHE_URL="$DOWNLOAD_SERVER/apache-$APACHE_VERSION.tar.gz"
 echo "-----> Bundling Apache version $APACHE_VERSION"
-curl --silent --max-time 60 --location "$APACHE_URL" | tar xz
+if [ -f "${BUILDPACK_CACHE}/$APACHE_FILE_NAME" ]; then
+    cp ${BUILDPACK_CACHE}/$APACHE_FILE_NAME $APACHE_FILE_NAME
+else
+    APACHE_URL="$DOWNLOAD_SERVER/$APACHE_FILE_NAME"
+    curl --silent --max-time 60 --location "$APACHE_URL"
+fi
+tar xz $APACHE_FILE_NAME
 
-PHP_URL="$DOWNLOAD_SERVER/php-$PHP_VERSION.tar.gz"
 echo "-----> Bundling PHP version $PHP_VERSION"
-curl --silent --max-time 60 --location "$PHP_URL" | tar xz
+if [ -f "${BUILDPACK_CACHE}/$PHP_FILE_NAME" ]; then
+    cp ${BUILDPACK_CACHE}/$PHP_FILE_NAME $PHP_FILE_NAME
+else
+    PHP_URL="$DOWNLOAD_SERVER/php-$PHP_VERSION.tar.gz"
+    curl --silent --max-time 60 --location "$PHP_URL"
+fi
+tar xz $PHP_FILE_NAME
 
 # update config files
 cp $LP_DIR/conf/httpd.conf $APACHE_PATH/conf
@@ -49,16 +62,16 @@ ln -s /app/php/bin/php bin/php
 
 cat >>boot.sh <<EOF
 for var in \`env|cut -f1 -d=\`; do
-  echo "PassEnv \$var" >> /app/apache/conf/httpd.conf;
+  echo "PassEnv \$var" >> /home/vcap/app/apache/conf/httpd.conf;
 done
-touch /app/apache/logs/error_log
-touch /app/apache/logs/access_log
-tail -F /app/apache/logs/error_log &
-tail -F /app/apache/logs/access_log &
-export LD_LIBRARY_PATH=/app/php/ext
-export PHP_INI_SCAN_DIR=/app/www
+touch /home/vcap/app/apache/logs/error_log
+touch /home/vcap/app/apache/logs/access_log
+tail -F /home/vcap/app/apache/logs/error_log &
+tail -F /home/vcap/app/apache/logs/access_log &
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/vcap/app/php/ext/:/home/vcap/app/libs/mysql/:/home/vcap/app/libs/php/modules/:/home/vcap/app/libs/
+export PHP_INI_SCAN_DIR=/home/vcap/app/www
 echo "Launching apache"
-exec /app/apache/bin/httpd -DNO_DETACH
+exec /home/vcap/app/apache/bin/httpd -DNO_DETACH
 EOF
 
 chmod +x boot.sh
