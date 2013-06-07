@@ -1,6 +1,6 @@
 Apache+PHP build pack
 ========================
-##This build pack is forked from heroku-buildpack-php and modified for local scenario.
+####This build pack is forked from heroku-buildpack-php and modified for local scenario.
 
 #Modification:
 1. change download server from amazon s3 to local server
