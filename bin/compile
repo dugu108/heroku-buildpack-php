@@ -39,7 +39,7 @@ if [ -f "${BUILDPACK_CACHE}/$APACHE_FILE_NAME" ]; then
     cp ${BUILDPACK_CACHE}/$APACHE_FILE_NAME $APACHE_FILE_NAME
 else
     APACHE_URL="$DOWNLOAD_SERVER/$APACHE_FILE_NAME"
-    curl --silent --max-time 60 --location "$APACHE_URL"
+    curl --silent --max-time 60 --location "$APACHE_URL" -o $APACHE_FILE_NAME
 fi
 tar xz $APACHE_FILE_NAME
 
@@ -48,7 +48,7 @@ if [ -f "${BUILDPACK_CACHE}/$PHP_FILE_NAME" ]; then
     cp ${BUILDPACK_CACHE}/$PHP_FILE_NAME $PHP_FILE_NAME
 else
     PHP_URL="$DOWNLOAD_SERVER/php-$PHP_VERSION.tar.gz"
-    curl --silent --max-time 60 --location "$PHP_URL"
+    curl --silent --max-time 60 --location "$PHP_URL" -o $PHP_FILE_NAME
 fi
 tar xz $PHP_FILE_NAME
 
