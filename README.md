@@ -5,7 +5,8 @@ Apache+PHP build pack
 #Modification:
 1. change download server from amazon s3 to local server
 2. update packages version
-3. modify some directory from /app for /home/vcap/app to work links bug on CentOS around 
+3. modify some directory from /app for /home/vcap/app to work links bug on CentOS around
+4. update php.ini to load some default extentions
 
 ##Original Readme
 
