@@ -1,5 +1,13 @@
 Apache+PHP build pack
 ========================
+##This build pack is forked from heroku-buildpack-php and modified for local scenario.
+
+#Modification:
+1. change download server from amazon s3 to local server
+2. update packages version
+3. modify some directory from /app for /home/vcap/app to work links bug on CentOS around 
+
+##Original Readme
 
 This is a build pack bundling PHP and Apache for Heroku apps.
 
